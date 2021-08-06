@@ -95,6 +95,8 @@ struct EmojiArtDocumentView: View {
         }
         return found
     }
+    
+    // MARK: - Panning
 
     @State private var steadyStatePanOffset = CGSize.zero
     @GestureState private var gesturePanOffset = CGSize.zero
@@ -145,28 +147,6 @@ struct EmojiArtDocumentView: View {
             let vZoom = size.height / image.size.height
             steadyStatePanOffset = .zero
             steadyStateZoomScale = min(hZoom, vZoom)
-        }
-    }
-    
-    var palette: some View {
-        ScrollingEmojisView(emojis: testEmojis)
-            .font(.system(size: defaultEmojiFontSize))
-    }
-    
-    let testEmojis = "🥂🧗‍♀️🏄‍♂️🤽‍♀️⚾️🥌🏉🏈🏀"
-}
-
-struct ScrollingEmojisView: View {
-    let emojis: String
-    
-    var body: some View {
-        ScrollView(.horizontal) {
-            HStack {
-                ForEach(emojis.map { String($0) }, id: \.self) { emoji in
-                    Text(emoji)
-                        .onDrag { NSItemProvider(object: emoji as NSString) }
-                }
-            }
         }
     }
 }

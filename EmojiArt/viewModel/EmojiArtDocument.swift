@@ -10,10 +10,19 @@ import SwiftUI
 class EmojiArtDocument: ObservableObject {
     @Published private(set) var emojiArt: EmojiArtModel {
         didSet {
-            autoSave()
+            scheduleAutoSave()
             if emojiArt.background != oldValue.background {
                 fetchBackgroundImageDataIfNecessary()
             }
+        }
+    }
+    
+    private var autoSaveTimer: Timer?
+
+    private func scheduleAutoSave() {
+        autoSaveTimer?.invalidate()
+        autoSaveTimer = Timer.scheduledTimer(withTimeInterval: Autosave.coalescingInterval, repeats: false) { _ in
+            self.autoSave()
         }
     }
     
@@ -23,8 +32,9 @@ class EmojiArtDocument: ObservableObject {
             let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
             return documentDirectory?.appendingPathComponent(filename)
         }
+        static let coalescingInterval = 5.0
     }
-    
+        
     private func autoSave() {
         if let url = Autosave.url {
             save(to: url)
@@ -47,9 +57,15 @@ class EmojiArtDocument: ObservableObject {
     }
     
     init() {
+        if let url = Autosave.url, let autosavedEmojiArt = try? EmojiArtModel(url: url) {
+            emojiArt = autosavedEmojiArt
+            fetchBackgroundImageDataIfNecessary()
+        } else {
+            emojiArt = EmojiArtModel()
+        }
         emojiArt = EmojiArtModel()
-        emojiArt.addEmoji("🏉", at: (-200, -100), size: 80)
-        emojiArt.addEmoji("🥎", at: (100, -50), size: 25)
+//        emojiArt.addEmoji("🏉", at: (-200, -100), size: 80)
+//        emojiArt.addEmoji("🥎", at: (100, -50), size: 25)
     }
     
     var emojis: [EmojiArtModel.Emoji] { emojiArt.emojis }

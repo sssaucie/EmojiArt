@@ -8,17 +8,20 @@
 import SwiftUI
 
 struct EmojiArtDocumentView: View {
+    
     @ObservedObject var document: EmojiArtDocument
     
     let defaultEmojiFontSize: CGFloat = 40
+        
     var body: some View {
         VStack(spacing: 0) {
             documentBody
-            palette
+            PaletteChooser(emojiFontSize: defaultEmojiFontSize)
         }
     }
     
     var documentBody: some View {
+                
         GeometryReader { geometry in
             ZStack {
                 Color.white.overlay(
@@ -43,6 +46,17 @@ struct EmojiArtDocumentView: View {
                 drop(providers: providers, at: location, in: geometry)
             }
             .gesture(panGesture().simultaneously(with: zoomGesture()))
+            .alert(item: $alertToShow) { alertToShow in
+                alertToShow.alert()
+            }
+            .onChange(of: document.backgroundImageFetchStatus) { status in
+                switch status {
+                case .failed(let url):
+                    showBackgroundImageFetchFailedAlert(url)
+                default:
+                    break
+                }
+            }
         }
     }
     
@@ -70,6 +84,22 @@ struct EmojiArtDocumentView: View {
         )
         return (Int(location.x), Int(location.y))
     }
+    
+    // MARK: - Alerts
+    
+    @State private var alertToShow: IdentifiableAlert?
+    
+    private func showBackgroundImageFetchFailedAlert(_ url: URL) {
+        alertToShow = IdentifiableAlert(id: "fetch failed: " + url.absoluteString, alert: {
+            Alert(
+                title: Text("Background Image Fetch"),
+                message: Text("Couldn't load image from \(url)."),
+                dismissButton: .default(Text("OK"))
+            )
+        })
+    }
+    
+    // MARK: - Drag and Drop
     
     private func drop(providers: [NSItemProvider], at location: CGPoint, in geometry: GeometryProxy) -> Bool {
         var found = providers.loadObjects(ofType: URL.self) { url in

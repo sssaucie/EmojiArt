@@ -21,6 +21,7 @@ struct PaletteManager: View {
                     NavigationLink(destination: PaletteEditor(palette: $store.palettes[palette])) {
                         VStack(alignment: .leading) {
                             Text(palette.name)
+                            // Add card pairs view
                             Text(palette.emojis)
                         }
                         .gesture(editMode == .active ? tap : nil)

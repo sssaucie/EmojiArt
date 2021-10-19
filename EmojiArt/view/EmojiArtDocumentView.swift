@@ -90,6 +90,8 @@ struct EmojiArtDocumentView: View {
     
     // MARK: - Alerts
     
+    @State private var autoZoom = false
+    
     @State private var alertToShow: IdentifiableAlert?
     
     private func showBackgroundImageFetchFailedAlert(_ url: URL) {
@@ -131,14 +133,14 @@ struct EmojiArtDocumentView: View {
     
     // MARK: - Panning
 
-    @State private var steadyStatePanOffset = CGSize.zero
+    @SceneStorage("EmojiArtDocumentView.steadyStatePanOffset") private var steadyStatePanOffset = CGSize.zero
     @GestureState private var gesturePanOffset = CGSize.zero
     
     private var panOffset: CGSize {
         (steadyStatePanOffset + gesturePanOffset) * zoomScale
     }
     
-    @State private var steadyStateZoomScale: CGFloat = 1
+    @SceneStorage("EmojiArtDocumentView.steadyStateZoomScale") private var steadyStateZoomScale: CGFloat = 1
     @GestureState private var gestureZoomScale: CGFloat = 1
     
     private var zoomScale: CGFloat {
